@@ -26,6 +26,8 @@ public class Filter {
     public void close() throws IOException {
     }
 
+
+    // 4133444|14278|6780|1|12|14307.24|0.01|0.06|R|F|1993-03-03|1993-03-22|1993-03-22|TAKE BACK RETURN|FOB|ular foxes cajole. instruct|
     public void map(LongWritable key, Text value, OutputCollector<LongWritable, Text> output, Reporter reporter) throws IOException {
       String token = "TAKE BACK RETURN";
 
