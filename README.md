@@ -32,5 +32,8 @@ ant build
 
 # Usar
 
+```sh
 ./mrexemplos -h
+
 ./mrexemplos -c filter
+```
