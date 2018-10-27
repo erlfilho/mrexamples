@@ -1,0 +1,26 @@
+<project>
+    <!-- clean -->
+    <target name="clean">
+        <delete dir="build"/>
+    </target>
+
+    <!-- build btrace -->
+    <target name="build" depends="compile">
+        <mkdir dir="build/"/>
+        <jar destfile="build/mrexamples.jar" basedir="build/classes"></jar>
+    </target>
+
+    <!-- compile -->
+    <target name="compile">
+        <mkdir dir="build/classes"/>
+        <javac srcdir="src/" destdir="build/classes" source="1.7" target="1.7">
+            <classpath>
+                <pathelement path="lib/hadoop-0.20.2-core.jar"/>
+                <pathelement path="lib/commons-cli-1.2.jar"/>
+                <pathelement path="lib/com.google.guava_1.6.0.jar"/>
+            </classpath>
+        </javac>
+    </target>
+
+    <target name="main" depends="compile, build"/>
+</project>

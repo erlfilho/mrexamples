@@ -1,0 +1,95 @@
+#!/bin/bash
+
+#################################
+# control program class and args 
+#################################
+
+commands=( "filter" "range" "aggregation" "groupby" "join" "wordcount")
+
+declare -A CLASSNAME
+declare -A ARGS
+
+# Class name 
+CLASSNAME["filter"]="br.ufpr.inf.lbd.examples.Filter"
+CLASSNAME["range"]="br.ufpr.inf.lbd.examples.Range"
+CLASSNAME["aggregation"]="br.ufpr.inf.lbd.examples.Aggregation"
+CLASSNAME["groupby"]="br.ufpr.inf.lbd.examples.GroupBy"
+CLASSNAME["join"]="br.ufpr.inf.lbd.examples.Join"
+CLASSNAME["wordcount"]="br.ufpr.inf.lbd.examples.WordCount"
+
+# Arguments
+ARGS["filter"]="/tpch/lineitem/lineitem.tbl filter"
+ARGS["range"]="/tpch/lineitem/lineitem.tbl range"
+ARGS["aggregation"]="/tpch/lineitem/lineitem.tbl aggregation"
+ARGS["groupby"]="/tpch/lineitem/lineitem.tbl groupby"
+ARGS["join"]="/tpch/lineitem/lineitem.tbl /tpch/orders/orders.tbl join"
+ARGS["wordcount"]="/tpch/orders/orders.tbl wordcount"
+
+# MR-Examples jar
+JAR="build/mrexamples.jar"
+
+#################################
+# functions
+#################################
+
+function print_help () {
+    echo "USAGE: mrexamples -h this help" 
+    echo "       mrexamples -c <command>" 
+    echo "       available commands are: ${commands[@]}"
+}
+
+function build () {
+    ant clean build
+}
+
+function run_command () {
+
+    # check if command is valid
+    cmd="$1"
+    found=0
+    for c in ${commands[@]}; do
+        if [ "$c" == "$cmd" ]; then
+            found=1
+        fi
+    done 
+    if [ ${found} -ne 1 ]; then
+        echo "error: command $cmd not found."
+        exit -1
+    fi
+
+    # run command
+    echo hadoop fs -rmr ${cmd}
+    echo hadoop jar ${JAR} ${CLASSNAME["$cmd"]} ${ARGS["$cmd"]}
+    hadoop fs -rmr ${cmd}
+    hadoop jar ${JAR} ${CLASSNAME["$cmd"]} ${ARGS["$cmd"]}
+}
+
+#################################
+# load libs
+#################################
+
+CLASSPATH=".:${CLASSPATH}"
+for lib in $(ls -1 lib/); do
+    CLASSPATH="${CLASSPATH}:lib/${lib}"
+done
+
+#################################
+# get args 
+#################################
+
+noargs=0
+while getopts pc:hb opts; do
+   noargs=1
+   case ${opts} in
+      b) build ;;
+      c) run_command ${OPTARG} ;;
+      p) PROFILE=true ;;
+      h) print_help;;
+      *) print_help;;
+   esac
+done
+
+# print help when there is no arg
+if [ $noargs -eq 0 ]; then
+    print_help
+fi
